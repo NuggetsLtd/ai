@@ -1,0 +1,20 @@
+{
+  "name": "mcp-weather",
+  "version": "1.0.0",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "tsc && chmod 755 build/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.8.0",
+    "dotenv": "^16.4.7",
+    "koa": "^2.16.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.15.0",
+    "@types/node": "^22.13.17",
+    "typescript": "^5.8.2"
+  }
+}

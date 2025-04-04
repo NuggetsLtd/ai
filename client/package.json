@@ -1,0 +1,22 @@
+{
+  "name": "mcp-bedrock-converse",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc && chmod 755 build/index.js",
+    "converse": "node build/index.js"
+  },
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.779.0",
+    "@modelcontextprotocol/sdk": "^1.8.0",
+    "express": "^5.1.0",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.15.0",
+    "@types/node": "^22.14.0",
+    "typescript": "^5.8.2"
+  }
+}
