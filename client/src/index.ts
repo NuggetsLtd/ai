@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import express from "express";
 import http from "http";
 import { Server, Socket } from "socket.io";
@@ -5,6 +6,7 @@ import path from "path";
 import { fileURLToPath } from 'url';
 import { ConverseMcpClient, Message } from './converse-mcp-client.js'
 import EventEmitter from "events";
+import config from './config.js'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,7 +14,8 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-const awsBedrockModelId = 'arn:aws:bedrock:us-east-1:454245708275:inference-profile/us.anthropic.claude-3-haiku-20240307-v1:0'
+const awsBedrockModelId = config.bedrock.modelId;
+const awsBedrockRegion = config.bedrock.region;
 const chatWelcomeMessage: Message = {
   role: "assistant",
   content: [{
@@ -20,13 +23,19 @@ const chatWelcomeMessage: Message = {
   }]
 };
 
+if(!awsBedrockModelId) {
+  throw new Error("BEDROCK_MODEL_ID environment variable is not set");
+}
+if(!awsBedrockRegion) {
+  throw new Error("BEDROCK_REGION environment variable is not set");
+}
 
 app.use(express.static(path.join(__dirname, "../public")));
 
 io.on("connection", async (socket: Socket) => {
   console.log("A user connected");
   const eventEmitter = new EventEmitter();
-  const client = new ConverseMcpClient(awsBedrockModelId, eventEmitter)
+  const client = new ConverseMcpClient(awsBedrockModelId, awsBedrockRegion, eventEmitter)
   await client.connectToMcpServer('../server/build/index.js')
 
   io.emit("chat message", chatWelcomeMessage);

@@ -16,8 +16,8 @@ export class ConverseMcpClient {
     private conversation: Message[] = []
     private eventEmitter: EventEmitter
 
-    constructor(modelId: string, eventEmitter: EventEmitter) {
-        this.bedrock = new BedrockRuntimeClient({ region: 'us-east-1' })
+    constructor(modelId: string, region: string, eventEmitter: EventEmitter) {
+        this.bedrock = new BedrockRuntimeClient({ region })
         this.mcp = new Client({ name: "mcp-client-cli", version: "1.0.0" })
         this.modelId = modelId
         this.eventEmitter = eventEmitter
@@ -81,7 +81,6 @@ export class ConverseMcpClient {
                     if (contentBlock.toolUse?.name) {
                         const toolName = contentBlock.toolUse.name
                         const toolArguments = JSON.parse(JSON.stringify(contentBlock.toolUse.input))
-                        console.log("Tool use detected", toolName, toolArguments);
                         const response = await this.mcp.callTool({
                             name: toolName,
                             arguments: toolArguments
@@ -89,7 +88,6 @@ export class ConverseMcpClient {
                         if(toolName === "generate-invite-qr-code" && response) {
                           this.eventEmitter.emit("message", response)
                         }
-                        console.log("Tool response", response);
                         const message: Message = {
                             role: "user",
                             content: [{
@@ -101,8 +99,6 @@ export class ConverseMcpClient {
                                 }
                             }]
                         }
-                        // @ts-ignore
-                        console.log("Tool result", message?.content[0].toolResult);
                         this.conversation.push(message)
                         await this.converse()
                     }
@@ -112,7 +108,6 @@ export class ConverseMcpClient {
         }
         else if (response.output?.message) {
             const message = response.output.message
-            console.log(message.content?.[0].text);
             this.conversation.push(message)
             this.eventEmitter.emit("message", message)
         }
