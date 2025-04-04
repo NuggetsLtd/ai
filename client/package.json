@@ -11,6 +11,7 @@
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.779.0",
     "@modelcontextprotocol/sdk": "^1.8.0",
+    "dotenv": "^16.4.7",
     "express": "^5.1.0",
     "socket.io": "^4.8.1"
   },
