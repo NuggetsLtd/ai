@@ -60,7 +60,8 @@ server.tool(
     })
 
     const body = await response.json()
-    const qrCode = Buffer.from(body.qrCode).toString('base64')
+    const { deeplink, ref, qrCode } = body
+    const qrCodeBase64 = Buffer.from(qrCode).toString('base64')
 
     if (!response.ok) {
       throw new Error(`Failed to generate QR code: ${response.statusText}`);
@@ -69,8 +70,13 @@ server.tool(
     return {
       content: [{ 
         type: 'image',
-        data: qrCode,
-        mimeType: 'image/svg+xml'
+        data: qrCodeBase64,
+        mimeType: 'image/svg+xml',
+        altText: "Nuggets QR Code; Scan with your Nuggets app to verify your identity.",
+        title: "Nuggets QR Code",
+        description: "Scan this QR code with your Nuggets app to verify your identity.",
+        deeplink,
+        ref
        }]
     }
   }

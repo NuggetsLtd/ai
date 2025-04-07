@@ -103,22 +103,26 @@
       font-size: 16px;
     }
 
-    .chat__qrCode {
+    .chat__nuggetsInvite {
       display: flex;
       justify-content: center;
       align-items: center;
       margin-top: 10px;
       margin-bottom: 10px;
+      flex-direction: column;
+      border-radius: 15px;
+      background-color: #fff;
+    }
+
+    .chat__qrCode {
       position: relative;
+      padding: 10px;
+      padding-bottom: 0;
     }
 
     .chat__qrCode svg:first-child {
       width: 180px;
       height: auto;
-      padding: 10px;
-      border-radius: 15px;
-      background-color: #fff;
-      display: flex;
     }
 
     .chat__qrCode svg:first-child path:nth-child(2) {
@@ -137,6 +141,31 @@
     .nuggets__logo {
       width: 150px;
       margin: 20px auto 0;
+    }
+
+    .chat__nuggetsInviteDeeplink {
+      text-decoration: none;
+      background-color: #8664a0;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      display: block;
+      text-align: center;
+      width: 140px;
+    }
+
+    .chat__qrCodeReference {
+      font-size: 12px;
+      color: #333;
+      text-align: center;
+      margin: 15px 0;
+    }
+
+    .notification {
+      padding: 15px;
     }
   </style>
 </head>
@@ -257,38 +286,47 @@
       }
       if (message.type === 'image' && message.mimeType === 'image/svg+xml') {
         const svg = atob(message.data);
-        item.innerHTML += `<div class="chat__qrCode">
-          ${svg}
-          <svg class="chat__nuggetsIcon" viewBox="0 0 38 36" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <filter x="-16.7%" y="-18.9%" width="133.3%" height="137.9%" filterUnits="objectBoundingBox" id="a">
-                <feOffset dx="1" dy="1" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
-                <feGaussianBlur stdDeviation=".5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
-                <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
-                <feMerge>
-                  <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
-                  <feMergeNode in="SourceGraphic"></feMergeNode>
-                </feMerge>
-              </filter>
-            </defs>
-            <g fill="none" fill-rule="evenodd">
-              <path d="M25.531 1.204c1.3 0 2.544.368 3.61 1.027a6.906 6.906 0 012.539 2.777h0l5.182 10.322a6.96 6.96 0 01-.01 6.262h0L31.668 31.83a6.906 6.906 0 01-2.537 2.762 6.854 6.854 0 01-3.6 1.022h0-12.913a6.854 6.854 0 01-3.603-1.023 6.906 6.906 0 01-2.538-2.767h0l-5.17-10.237a6.96 6.96 0 01-.01-6.25h0l5.17-10.322a6.906 6.906 0 012.538-2.781 6.854 6.854 0 013.613-1.03h0z" stroke="#C8C8C8" stroke-width=".625" fill="#FFF"></path>
-              <g filter="url(#a)" transform="translate(7.429 8.1)">
-                <path fill="#8168A0" d="M11.64 17.892l11.639-7.571-11.64-7.571z"></path>
-                <path fill="#CAC8E9" d="M5.168 0L0 10.32l11.64-7.57z"></path>
-                <path fill="#CAA3C7" d="M18.11 0l-6.47 2.75 11.639 7.57z"></path>
-                <path fill="#E4D8EB" d="M5.168 0l6.471 2.75L18.111 0z"></path>
-                <path fill="#793773" d="M5.168 20.642h12.943l-6.472-2.75z"></path>
-                <path fill="#7D4476" d="M11.64 17.892l6.47 2.75 5.17-10.322z"></path>
-                <path fill="#88739F" d="M5.168 20.642l6.471-2.75L0 10.321z"></path>
-                <path fill="#9B90C1" d="M0 10.32l11.64 7.572V2.75z"></path>
+        item.innerHTML += `<div id="${message.ref}" class="chat__nuggetsInvite">
+          <div class="chat__qrCode">
+            ${svg}
+            <svg class="chat__nuggetsIcon" viewBox="0 0 38 36" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <filter x="-16.7%" y="-18.9%" width="133.3%" height="137.9%" filterUnits="objectBoundingBox" id="a">
+                  <feOffset dx="1" dy="1" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+                  <feGaussianBlur stdDeviation=".5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+                  <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+                  <feMerge>
+                    <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                    <feMergeNode in="SourceGraphic"></feMergeNode>
+                  </feMerge>
+                </filter>
+              </defs>
+              <g fill="none" fill-rule="evenodd">
+                <path d="M25.531 1.204c1.3 0 2.544.368 3.61 1.027a6.906 6.906 0 012.539 2.777h0l5.182 10.322a6.96 6.96 0 01-.01 6.262h0L31.668 31.83a6.906 6.906 0 01-2.537 2.762 6.854 6.854 0 01-3.6 1.022h0-12.913a6.854 6.854 0 01-3.603-1.023 6.906 6.906 0 01-2.538-2.767h0l-5.17-10.237a6.96 6.96 0 01-.01-6.25h0l5.17-10.322a6.906 6.906 0 012.538-2.781 6.854 6.854 0 013.613-1.03h0z" stroke="#C8C8C8" stroke-width=".625" fill="#FFF"></path>
+                <g filter="url(#a)" transform="translate(7.429 8.1)">
+                  <path fill="#8168A0" d="M11.64 17.892l11.639-7.571-11.64-7.571z"></path>
+                  <path fill="#CAC8E9" d="M5.168 0L0 10.32l11.64-7.57z"></path>
+                  <path fill="#CAA3C7" d="M18.11 0l-6.47 2.75 11.639 7.57z"></path>
+                  <path fill="#E4D8EB" d="M5.168 0l6.471 2.75L18.111 0z"></path>
+                  <path fill="#793773" d="M5.168 20.642h12.943l-6.472-2.75z"></path>
+                  <path fill="#7D4476" d="M11.64 17.892l6.47 2.75 5.17-10.322z"></path>
+                  <path fill="#88739F" d="M5.168 20.642l6.471-2.75L0 10.321z"></path>
+                  <path fill="#9B90C1" d="M0 10.32l11.64 7.572V2.75z"></path>
+                </g>
               </g>
-            </g>
-          </svg>
+            </svg>
+          </div>
+          <div class="chat__qrCodeDeeplink">
+            <a href="${message.deeplink}" target="_blank" class="chat__nuggetsInviteDeeplink">
+              Open in Nuggets App
+            </a>
+          </div>
+          <div class="chat__qrCodeReference">Ref: ${message.ref}</div>
         </div>`;
       }
-
       messages.appendChild(item);
+
+      messages.scrollTop = messages.scrollHeight;
     }
 
     form.addEventListener('submit', (event) => {
@@ -315,6 +353,18 @@
 
       msg.content.forEach(element => addMessageToList(element));
     });
+
+    socket.on('chat notification', (msg) => {
+      const nuggetsInviteBlock = document.getElementById(msg.ref);
+
+      if (nuggetsInviteBlock && msg.status === 'IN PROGRESS') {
+        nuggetsInviteBlock.innerHTML = `<div class="notification notification--in-progress">↔️ NUGGETS APP CONNECTED</div>`;
+      }
+
+      if (nuggetsInviteBlock && msg.status === 'COMPLETED') {
+        nuggetsInviteBlock.innerHTML = `<div class="notification notification--complete">${msg.outcome.verified ? '✅ VERIFICATION COMPLETE' : '❌ VERIFICATION FAILED'}</div>`;
+      }
+    })
   </script>
 </body>
 
