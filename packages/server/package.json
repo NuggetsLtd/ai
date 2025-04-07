@@ -1,10 +1,17 @@
 {
-  "name": "mcp-weather",
+  "name": "@nuggetslife/mcp-server",
   "version": "1.0.0",
   "license": "MIT",
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "build": "tsc && chmod 755 build/index.js"
+    "build": "tsup --config tsup.config.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.8.0",

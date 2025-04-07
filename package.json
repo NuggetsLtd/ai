@@ -1,0 +1,16 @@
+{
+  "name": "@nuggetslife/poc-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "yarn@1.22.22",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "docker:communicator": "docker compose --env-file=./docker/.env up"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0"
+  }
+}

@@ -1,5 +1,6 @@
 import 'dotenv/config'
 import express from "express";
+import expressWs from 'express-ws';
 import http from "http";
 import { Server, Socket } from "socket.io";
 import path from "path";
@@ -30,13 +31,15 @@ if(!awsBedrockRegion) {
   throw new Error("BEDROCK_REGION environment variable is not set");
 }
 
+expressWs(app);
+
 app.use(express.static(path.join(__dirname, "../public")));
 
 io.on("connection", async (socket: Socket) => {
   console.log("A user connected");
   const eventEmitter = new EventEmitter();
   const client = new ConverseMcpClient(awsBedrockModelId, awsBedrockRegion, eventEmitter)
-  await client.connectToMcpServer('../server/build/index.js')
+  await client.connectToMcpServer('../../node_modules/@nuggetslife/mcp-server/dist/index.js')
 
   io.emit("chat message", chatWelcomeMessage);
 
@@ -61,6 +64,10 @@ io.on("connection", async (socket: Socket) => {
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "index.html"));
 });
+
+app.get("/communicator/callback", (req, res) => {
+
+})
 
 const PORT = process.env.PORT || 3003;
 
