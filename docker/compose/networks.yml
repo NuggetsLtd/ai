@@ -1,0 +1,7 @@
+networks:
+  nuggets-internal:
+    driver: bridge
+    internal: true
+  nuggets:
+    driver: bridge
+    internal: false

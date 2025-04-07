@@ -1,0 +1,41 @@
+include:
+  - ./networks.yml
+  - ./redis.yml
+
+services:
+
+  nuggets-communicator:
+    container_name: nuggets-communicator
+    platform: ${PLATFORM}
+    image: nuggetsltd/partner-communicator:latest
+    depends_on:
+      - redis
+    environment:
+      - NODE_ENV=${ENVIRONMENT}
+      - PORT=3018
+      - MNEMONIC=${PARTNER_COMMUNICATOR_MNEMONIC}
+      - NAME=Partner Communicator
+      - API_BASE_URL=https://api-dev.internal-nuggets.life
+      - MQ_SUBSCRIBE_HOST=queue-dev.internal-nuggets.life
+      - MQ_SUBSCRIBE_PORT=5671
+      - MQ_SUBSCRIBE_PROTOCOL=amqps
+      - MQ_SEND_URL=https://hermes-dev.internal-nuggets.life
+      - MQ_CALLBACK_URL=http://oauth-provider:3030/api/users/connect
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - WEBHOOK_API_BASE_URL=ws://oauth-provider:3015
+      - WEBHOOK_API_TOKEN=d4f9f5a6-5926-4f91-9419-3e3d237d0e1b
+      - VC_TYPES={"UnitTestType":{"expirySeconds":31556952},"IntegrationTestType":{"expirySeconds":31556952},"VerifiableCredential":{"expirySeconds":31556952},"RoleCredential":{"expirySeconds":31556952},"VeriteVerificationRequestCredential":{"expirySeconds":31556952},"CryptoAccountCredential":{"expirySeconds":31556952},"DrivingLicence":{"expirySeconds":31556952},"CheckRequestCredential":{"expirySeconds":31556952},"KudosCredential":{"expirySeconds":31556952}}
+      - KYC_DID=did:nuggets:3g8ffngMdC9gbsg64fC8GW3wvzf7
+    healthcheck:
+      test:
+        ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://hermes:3010']
+      interval: 10s
+      retries: 5
+      start_period: 20s
+      timeout: 10s
+    ports:
+      - '3018:3018'
+    networks:
+      - nuggets
+      - nuggets-internal
