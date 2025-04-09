@@ -1,7 +1,10 @@
 import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: {
+    index: 'src/index.ts',
+    "oidc-client": 'src/oidc-client.ts',
+  },
   format: ['esm'],
   dts: true,
   sourcemap: true,

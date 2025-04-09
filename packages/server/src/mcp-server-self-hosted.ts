@@ -2,8 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import config from './config.js'
-
-const validInviteReasons = ['fullname', 'over18'] as const;
+import { validScopes, OnUserConnect } from "./types.js";
 
 // Create server instance
 const server = new McpServer({
@@ -16,11 +15,6 @@ const server = new McpServer({
     prompts: {},
   },
 });
-
-type OnUserConnect = string | {
-  uri: string;
-  payload: object;
-};
 
 
 // ********** Helper Functions **********
@@ -45,7 +39,7 @@ function determineOnUserConnect(reason: string): OnUserConnect {
 server.tool(
   "generate-invite-qr-code",
   "Generate a Nuggets QR code for user to verify their identity. Each user interaction requires a new unique QR code to be generated",
-  { reason: z.enum(validInviteReasons) },
+  { reason: z.enum(validScopes) },
   async ({ reason }) => {
     // Generate QR code
     const response = await fetch(`${config.selfHostedCommunicatorUrl}/api/didcomm/invite`, {
@@ -88,7 +82,7 @@ server.tool(
 server.prompt(
   "generate-invite-qr-code-identity",
   "Generate a Nuggets QR code for user to verify their identity. Each user interaction requires a new unique QR code to be generated",
-  { reason: z.enum(validInviteReasons) },
+  { reason: z.enum(validScopes) },
   ({ reason }) => ({
     messages: [{
       role: "user",
