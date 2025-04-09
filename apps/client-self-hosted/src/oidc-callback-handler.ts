@@ -1,6 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
 
+import { Request, Response } from "express";
+import { callback as oidcCallback, type OIDCQueryResponse, type OIDCCallbackResponse } from '@nuggetslife/mcp-server/oidc-client'
+import { Notification } from './types.js'
+
+const htmlHeader = `<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,120 +26,21 @@
       background-color: #f2f2f2;
     }
 
-    .chat {
+    .callback {
       width: auto;
       max-width: 600px;
       width: 100%;
     }
 
-    .chat__container {
+    .callback__container {
       background-color: #fff;
       padding: 25px;
       border-radius: 15px;
       box-shadow: 0px 4px 24px #d8d8d8;
     }
 
-    .chat__title {
+    .callback__title {
       margin-top: 0;
-    }
-
-    .chat__messages {
-      list-style-type: none;
-      margin: 0;
-      padding: 0;
-      max-height: 400px;
-      overflow-y: auto;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      padding: 10px;
-      background-color: #8664a014;
-      font-size: 16px;
-    }
-
-    .chat__message {
-      margin-top: 5px;
-    }
-
-    .chat__message:first-child {
-      margin-top: 0;
-    }
-
-    .chat__message--own::before {
-      content: "You 🧑‍🦰: ";
-      font-weight: bold;
-    }
-
-    .chat__message--assistant::before {
-      content: "Bot 🤖: ";
-      font-weight: bold;
-    }
-
-    .chat__form {
-      position: relative;
-      margin-top: 1em;
-      font-size: 16px;
-    }
-
-    .chat__messageInput {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      padding-right: 110px;
-      box-sizing: border-box;
-      font-size: 16px;
-    }
-
-    .chat__sendButton {
-      background-color: blue;
-      color: aliceblue;
-      border: none;
-      border-radius: 5px;
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-      padding: 10px;
-      cursor: pointer;
-      position: absolute;
-      right: 0;
-      top: 0;
-      height: 100%;
-      width: 100px;
-      font-size: 16px;
-    }
-
-    .chat__nuggetsInvite {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      flex-direction: column;
-      border-radius: 15px;
-      background-color: #fff;
-    }
-
-    .chat__qrCode {
-      position: relative;
-      padding: 10px;
-      padding-bottom: 0;
-    }
-
-    .chat__qrCode svg:first-child {
-      width: 180px;
-      height: auto;
-    }
-
-    .chat__qrCode svg:first-child path:nth-child(2) {
-      stroke: #8664a0;
-    }
-
-    .chat__nuggetsIcon {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      height: 36px;
-      margin-left: -18px;
-      margin-top: -18px;
     }
 
     .nuggets__logo {
@@ -143,42 +48,58 @@
       margin: 20px auto 0;
     }
 
-    .chat__nuggetsInviteDeeplink {
-      text-decoration: none;
-      background-color: #8664a0;
-      color: #fff;
+    .callback__closeWindow {
+      background-color: blue;
+      color: aliceblue;
       border: none;
       border-radius: 5px;
       padding: 10px;
       cursor: pointer;
-      font-size: 14px;
-      display: block;
-      text-align: center;
-      width: 140px;
+      right: 0;
+      top: 0;
+      font-size: 16px;
+      text-decoration: none;
+      line-height: 1em;
+      margin-top: 15px;
+      display: inline-block;
     }
 
-    .chat__qrCodeReference {
-      font-size: 12px;
-      color: #333;
-      text-align: center;
-      margin: 15px 0;
+    .social__link {
+      display: flex;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #d8d8d8;
     }
 
-    .notification {
-      padding: 15px;
+    .social__link:hover {
+      background-color: #f2f2f2;
+    }
+
+    .social__profileImage {
+      height: 50px;
+      width: auto;
+      border-radius: 50%;
+    }
+
+    .social__title,
+    .social__profileImage {
+      display: inline-block;
+      line-height: 50px;
+    }
+
+    .social__title {
+      margin: 0 0 0 10px;
+      font-size: 20px;
     }
   </style>
 </head>
-
 <body>
-  <section class="chat">
-    <div class="chat__container">
-      <h1 class="chat__title">Nuggets MCP Chat PoC</h1>
-      <ul id="messages" class="chat__messages"></ul>
-      <form id="form" class="chat__form" action="">
-        <input id="messageInput" class="chat__messageInput" autocomplete="off" autofocus />
-        <button id="sendButton" class="chat__sendButton">Send</button>
-      </form>
+  <section class="callback">
+    <div class="callback__container">
+      <h1 class="callback__title">Verification Complete</h1>`
+const htmlFooter = `
+      <a href="#" onclick="window.close();return false;" class="callback__closeWindow">Close window</a>
     </div>
     <footer class="nuggets__logo">
       <svg viewBox="0 0 341 151" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -253,124 +174,61 @@
       </svg>
     </footer>
   </section>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
-  <script>
-    const socket = io();
-
-    const messages = document.getElementById('messages');
-    const messageInput = document.getElementById('messageInput');
-    const sendButton = document.getElementById('sendButton');
-    const form = document.getElementById('form');
-
-    function sendMessage() {
-      const message = messageInput.value;
-
-      if (message.trim() !== '') {
-        socket.emit('chat message', message);
-        messageInput.value = '';
-        addMessageToList({ text: message }, true);
-      }
-    }
-
-    function addMessageToList(message, isOwnMessage = false) {
-      const item = document.createElement('li');
-      item.classList.add('chat__message');
-
-      (isOwnMessage)
-        ? item.classList.add('chat__message--own')
-        : item.classList.add('chat__message--assistant');
-
-      if (message.text && message.url) {
-        item.innerHTML = `<a href="${message.url}" target="_blank" class="chat__messageLink">Nuggets Verification Invite</a>`;
-      }
-
-      if (message.text && !message.url) {
-        item.textContent = message.text;
-      }
-
-      if (message.type === 'image' && message.mimeType === 'image/svg+xml') {
-        const svg = atob(message.data);
-        item.innerHTML += `<div id="${message.ref}" class="chat__nuggetsInvite">
-          <div class="chat__qrCode">
-            ${svg}
-            <svg class="chat__nuggetsIcon" viewBox="0 0 38 36" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <filter x="-16.7%" y="-18.9%" width="133.3%" height="137.9%" filterUnits="objectBoundingBox" id="a">
-                  <feOffset dx="1" dy="1" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
-                  <feGaussianBlur stdDeviation=".5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
-                  <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.5 0" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
-                  <feMerge>
-                    <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
-                    <feMergeNode in="SourceGraphic"></feMergeNode>
-                  </feMerge>
-                </filter>
-              </defs>
-              <g fill="none" fill-rule="evenodd">
-                <path d="M25.531 1.204c1.3 0 2.544.368 3.61 1.027a6.906 6.906 0 012.539 2.777h0l5.182 10.322a6.96 6.96 0 01-.01 6.262h0L31.668 31.83a6.906 6.906 0 01-2.537 2.762 6.854 6.854 0 01-3.6 1.022h0-12.913a6.854 6.854 0 01-3.603-1.023 6.906 6.906 0 01-2.538-2.767h0l-5.17-10.237a6.96 6.96 0 01-.01-6.25h0l5.17-10.322a6.906 6.906 0 012.538-2.781 6.854 6.854 0 013.613-1.03h0z" stroke="#C8C8C8" stroke-width=".625" fill="#FFF"></path>
-                <g filter="url(#a)" transform="translate(7.429 8.1)">
-                  <path fill="#8168A0" d="M11.64 17.892l11.639-7.571-11.64-7.571z"></path>
-                  <path fill="#CAC8E9" d="M5.168 0L0 10.32l11.64-7.57z"></path>
-                  <path fill="#CAA3C7" d="M18.11 0l-6.47 2.75 11.639 7.57z"></path>
-                  <path fill="#E4D8EB" d="M5.168 0l6.471 2.75L18.111 0z"></path>
-                  <path fill="#793773" d="M5.168 20.642h12.943l-6.472-2.75z"></path>
-                  <path fill="#7D4476" d="M11.64 17.892l6.47 2.75 5.17-10.322z"></path>
-                  <path fill="#88739F" d="M5.168 20.642l6.471-2.75L0 10.321z"></path>
-                  <path fill="#9B90C1" d="M0 10.32l11.64 7.572V2.75z"></path>
-                </g>
-              </g>
-            </svg>
-          </div>
-          <div class="chat__qrCodeDeeplink">
-            <a href="${message.deeplink}" target="_blank" class="chat__nuggetsInviteDeeplink">
-              Open in Nuggets App
-            </a>
-          </div>
-          <div class="chat__qrCodeReference">Ref: ${message.ref}</div>
-        </div>`;
-      }
-      messages.appendChild(item);
-
-      messages.scrollTop = messages.scrollHeight;
-    }
-
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
-      sendMessage();
-    });
-
-    sendButton.addEventListener('click', () => {
-      sendMessage();
-    });
-
-    document.addEventListener('keypress', () => {
-      if (event.key === 'Enter') {
-        sendMessage();
-      }
-    });
-
-    socket.on('chat message', (msg) => {
-      const item = document.createElement('li');
-
-      if (!msg?.content?.length) {
-        return
-      }
-
-      msg.content.forEach(element => addMessageToList(element));
-    });
-
-    socket.on('chat notification', (msg) => {
-      const nuggetsInviteBlock = document.getElementById(msg.ref);
-
-      if (nuggetsInviteBlock && msg.status === 'IN PROGRESS') {
-        nuggetsInviteBlock.innerHTML = `<div class="notification notification--in-progress">↔️ NUGGETS APP CONNECTED</div>`;
-      }
-
-      if (nuggetsInviteBlock && msg.status === 'COMPLETED') {
-        nuggetsInviteBlock.innerHTML = `<div class="notification notification--complete">${msg.outcome.verified ? '✅ VERIFICATION COMPLETE' : '❌ VERIFICATION FAILED'}</div>`;
-      }
-    })
-  </script>
 </body>
+</html>`
 
-</html>
+export const oidcCallbackHandler = async (req: Request, res: Response): Promise<Notification> => {
+  if(!req.query.response) {
+    console.log("No response in OIDC callback");
+    res.sendStatus(400);
+
+    return {
+      status: 'FAILED',
+      outcome: {
+        verified: false,
+        error: "No response in OIDC callback",
+      }
+    } as Notification;
+  }
+
+  const outcome = await oidcCallback(req.query as OIDCQueryResponse)
+
+  switch (outcome.type) {
+    case 'Twitter':
+      return handleTwitterCallback(outcome, res);
+    default:
+      console.log("Unknown OIDC callback type");
+      res.sendStatus(400);
+
+      return {
+        status: 'FAILED',
+        outcome: {
+          verified: false,
+          error: "Unknown OIDC callback type",
+        }
+      } as Notification;
+  }
+}
+
+const handleTwitterCallback = (outcome: OIDCCallbackResponse, res: Response) => {
+  const htmlBody = `<a href="${outcome.url}" target="_blank" rel="noopener noreferrer" class="social__link">
+    <img src="${outcome.profileImage}" alt="Twitter Profile Image" class="social__profileImage" />
+    <h2 class="social__title">${outcome.username}</h2>
+  </a>`
+
+  res.send(`${htmlHeader}${htmlBody}${htmlFooter}`)
+
+  return {
+    ref: outcome.ref,
+    status: 'COMPLETED',
+    outcome: {
+      verified: true,
+      proof: {
+        type: outcome.type,
+        url: outcome.url,
+        username: outcome.username,
+        profileImage: outcome.profileImage,
+      }
+    }
+  } as Notification
+}

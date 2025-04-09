@@ -7,18 +7,8 @@ import { fileURLToPath } from 'url';
 import { ConverseMcpClient, Message } from './converse-mcp-client.js'
 import EventEmitter from "events";
 import config from './config.js'
-
-type Notification = {
-  ref: string;
-  status: string;
-  outcome?: {
-    verified: boolean;
-    proof: {
-      type: string;
-      over18: boolean;
-    };
-  }
-}
+import { Notification } from './types.js'
+import { oidcCallbackHandler } from './oidc-callback-handler.js'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -52,8 +42,14 @@ const notificationEventEmitter = new EventEmitter();
 io.on("connection", async (socket: Socket) => {
   console.log("A user connected");
   const mcpServerEventEmitter = new EventEmitter();
-  const client = new ConverseMcpClient(awsBedrockModelId, awsBedrockRegion, mcpServerEventEmitter)
-  await client.connectToMcpServer('../../node_modules/@nuggetslife/mcp-server/dist/index.js')
+  const mcpClient = new ConverseMcpClient(awsBedrockModelId, awsBedrockRegion, mcpServerEventEmitter)
+  mcpClient.connectToMcpServer('../../node_modules/@nuggetslife/mcp-server/dist/index.js')
+    .then(() => {
+      console.log("Connected to MCP server");
+    })
+    .catch((error) => {
+      console.error("Failed to connect to MCP server: ", error);
+    });
 
   io.emit("chat message", chatWelcomeMessage);
 
@@ -65,7 +61,7 @@ io.on("connection", async (socket: Socket) => {
     io.emit("chat message", msg);
     
     // send message to mcp server
-    client.sendMessage(msg)
+    mcpClient.sendMessage(msg)
   });
 
   mcpServerEventEmitter.on("message", (message: any) => {
@@ -78,13 +74,32 @@ io.on("connection", async (socket: Socket) => {
 
       if (notification.status === "COMPLETED") {
         // update mcp server with the outcome
-        !!notification?.outcome?.verified
-          ? client.sendMessage('I have completed the verification process, and am verified as over 18')
-          : client.sendMessage('I have completed the verification process, and failed to verify I am over 18');
+        mcpClient.sendMessage(sendOutcomeToMcpClient(notification.outcome));
       }
     })
   })
 });
+
+const sendOutcomeToMcpClient = (outcome: any) => {
+  let outcomeMsg = "I have completed the verification process, and ";
+
+  outcome.verified
+    ? outcomeMsg += "verified "
+    : outcomeMsg += "failed to verify ";
+  
+  switch (outcome.proof.type) {
+    case "over18":
+      outcomeMsg += "that I am over 18 years old";
+      break;
+    case "Twitter":
+      outcomeMsg += `my Twitter account${outcome.verified ? ` username is ${outcome.proof.username}` : ""}`;
+      break;
+    default:
+      outcomeMsg += `the identity element`;
+  }
+
+  return outcomeMsg;
+}
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "index.html"));
@@ -119,6 +134,14 @@ app.post("/didcomm", (req, res) => {
 
   res.sendStatus(200);
 });
+
+app.get("/oidc/callback", async (req, res) => {
+  // handle OIDC callback
+  const notification: Notification = await oidcCallbackHandler(req, res)
+
+  // emit notification event
+  notificationEventEmitter.emit(notification?.ref, notification)
+})
 
 const PORT = process.env.PORT || 3003;
 

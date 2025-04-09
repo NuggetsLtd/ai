@@ -58,6 +58,14 @@ export class ConverseMcpClient {
         }
     }
 
+    _handleToolResponse(toolName: string, response: any) {
+      if(!["generate-invite-qr-code", "generate-invite-oidc-link"].includes(toolName) || !response) {
+        return
+      }
+      
+      this.eventEmitter.emit("message", response)
+    }
+
     async converse() {
         const input: ConverseCommandInput = {
             modelId: this.modelId,
@@ -86,9 +94,9 @@ export class ConverseMcpClient {
                             name: toolName,
                             arguments: toolArguments
                         })
-                        if(toolName === "generate-invite-qr-code" && response) {
-                          this.eventEmitter.emit("message", response)
-                        }
+
+                        this._handleToolResponse(toolName, response)
+
                         const message: Message = {
                             role: "user",
                             content: [{
