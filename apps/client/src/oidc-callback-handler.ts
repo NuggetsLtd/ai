@@ -198,7 +198,6 @@ export const oidcCallbackHandler = async (req: Request, res: Response): Promise<
   }
 
   const outcome = await oidcCallback(req.query as OIDCQueryResponse)
-  console.log("OIDC callback outcome", outcome);
 
   switch (outcome.type) {
     case 'Twitter':

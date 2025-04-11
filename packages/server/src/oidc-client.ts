@@ -115,7 +115,6 @@ export async function callback(response: OIDCQueryResponse): Promise<OIDCCallbac
    })
 
   const userInfo: OIDCUserInfoRespose = await oidcClient.userinfo(tokenSet)
-console.log('User info: ', userInfo)
 
   const type = userInfo?.proof?.credentialSubject?.type as string || 'unknown'
 
