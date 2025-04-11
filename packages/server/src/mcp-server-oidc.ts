@@ -2,7 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { generateOidcInvite } from "./oidc-client.js";
-import { validScopes } from "./types.js";
+import { ValidReasons, validScopes, ValidScopes } from "./types.js";
 
 // Create server instance
 const server = new McpServer({
@@ -16,6 +16,22 @@ const server = new McpServer({
   },
 });
 
+// ********** Helpers **********
+
+// map descriptive reasons, understandable by AI, to valid Nuggets OIDC scopes
+const mapReasonToScope = (reason: ValidReasons): ValidScopes => {
+  return {
+    kyb: "kyb",
+    over18: "over18",
+    profile: "profile",
+    name: "profile",
+    fullname: "profile",
+    rightToWork: "rightToWork",
+    'social:twitter': 'social:twitter',
+    'social:github': 'social:github',
+    }[reason] as ValidScopes
+}
+
 
 // ********** Implement Tool Execution **********
 
@@ -26,7 +42,7 @@ server.tool(
   async ({ reason }) => {
     // Generate OIDC Link
     const { url, ref } = await generateOidcInvite({
-      scope: reason,
+      scope: mapReasonToScope(reason),
     })
 
     return {

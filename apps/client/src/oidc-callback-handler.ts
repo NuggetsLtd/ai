@@ -64,7 +64,8 @@ const htmlHeader = `<!DOCTYPE html>
       display: inline-block;
     }
 
-    .social__link {
+    .social__link,
+    .person {
       display: flex;
       padding: 10px;
       margin-bottom: 15px;
@@ -91,6 +92,11 @@ const htmlHeader = `<!DOCTYPE html>
     .social__title {
       margin: 0 0 0 10px;
       font-size: 20px;
+    }
+
+    .person__details {
+      list-style: none;
+      padding: 0;
     }
   </style>
 </head>
@@ -192,10 +198,13 @@ export const oidcCallbackHandler = async (req: Request, res: Response): Promise<
   }
 
   const outcome = await oidcCallback(req.query as OIDCQueryResponse)
+  console.log("OIDC callback outcome", outcome);
 
   switch (outcome.type) {
     case 'Twitter':
       return handleTwitterCallback(outcome, res);
+    case 'Person':
+      return handlePersonCallback(outcome, res);
     default:
       console.log("Unknown OIDC callback type");
       res.sendStatus(400);
@@ -228,6 +237,30 @@ const handleTwitterCallback = (outcome: OIDCCallbackResponse, res: Response) => 
         url: outcome.url,
         username: outcome.username,
         profileImage: outcome.profileImage,
+      }
+    }
+  } as Notification
+}
+
+const handlePersonCallback = (outcome: OIDCCallbackResponse, res: Response) => {
+  const htmlBody = `<div class="person">
+    <ul class="person__details">
+      ${outcome.givenName ? `<li><strong>Name</strong>: ${outcome.givenName} ${outcome.familyName}</li>` : ''}
+      ${outcome.over18 ? '<li><strong>Over 18</strong>: Yes</li>' : '<li><strong>Over 18</strong>: No</li>'}
+    </ul>
+  </div>`
+
+  res.send(`${htmlHeader}${htmlBody}${htmlFooter}`)
+
+  return {
+    ref: outcome.ref,
+    status: 'COMPLETED',
+    outcome: {
+      verified: true,
+      proof: {
+        type: outcome.type,
+        givenName: outcome.givenName,
+        familyName: outcome.familyName,
       }
     }
   } as Notification

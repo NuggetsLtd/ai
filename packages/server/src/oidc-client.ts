@@ -1,6 +1,6 @@
 import { Issuer, BaseClient, ClientAuthMethod, generators } from 'openid-client'
 import config from './config.js'
-import { GenerateInviteInput, GenerateInviteOutput, OIDCQueryResponse, OIDCCachedValues, OIDCCallbackResponse } from './types.js'
+import { GenerateInviteInput, GenerateInviteOutput, OIDCQueryResponse, OIDCCachedValues, OIDCCallbackResponse, OIDCUserInfoRespose } from './types.js'
 import cache from "./cache.js"
 import { v4 as uuidv4 } from 'uuid'
 import * as jose from 'jose'
@@ -13,7 +13,8 @@ let oidcClient: BaseClient | undefined
 
 export type {
   OIDCQueryResponse,
-  OIDCCallbackResponse
+  OIDCCallbackResponse,
+  OIDCUserInfoRespose,
 }
 
 export async function loadOidcClient() {
@@ -90,7 +91,6 @@ export async function generateOidcInvite({
 }
 
 export async function callback(response: OIDCQueryResponse): Promise<OIDCCallbackResponse> {
-  console.log('Callback request params: ', response)
   await loadOidcClient()
 
   if (!oidcClient) {
@@ -114,21 +114,27 @@ export async function callback(response: OIDCQueryResponse): Promise<OIDCCallbac
     code_verifier: parsedValues.code_verifier,
    })
 
-  const userInfo = await oidcClient.userinfo(tokenSet)
+  const userInfo: OIDCUserInfoRespose = await oidcClient.userinfo(tokenSet)
+console.log('User info: ', userInfo)
+
+  const type = userInfo?.proof?.credentialSubject?.type as string || 'unknown'
 
   const outcome: OIDCCallbackResponse = {
     ref: state as string,
-    type: userInfo.type as string || 'unknown',
+    type
   }
 
-  switch (userInfo.type) {
+  switch (type) {
     case 'Twitter':
     case 'Github':
-      outcome.url = userInfo.url as URL
-      outcome.username = userInfo.username as string
-      outcome.profileImage = userInfo.profileImage as URL
+      outcome.url = userInfo?.proof?.credentialSubject?.url
+      outcome.username = userInfo?.proof?.credentialSubject?.username
+      outcome.profileImage = userInfo?.proof?.credentialSubject?.profileImage
       break;
-  
+    case 'Person':
+      userInfo?.given_name && (outcome.givenName = userInfo?.given_name)
+      userInfo?.family_name && (outcome.familyName = userInfo?.family_name)
+      userInfo?.proof?.credentialSubject?.over18 && (outcome.over18 = userInfo?.proof?.credentialSubject?.over18)
     default:
       break;
   }
