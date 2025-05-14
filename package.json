@@ -8,7 +8,8 @@
     "packages/*"
   ],
   "scripts": {
-    "docker:communicator": "docker compose --env-file=./docker/.env up"
+    "docker:communicator": "docker compose --env-file=./docker/.env up",
+    "aws:ecr:signin": "./scripts/aws-ecr-signin.sh"
   },
   "devDependencies": {
     "turbo": "^2.5.0"
