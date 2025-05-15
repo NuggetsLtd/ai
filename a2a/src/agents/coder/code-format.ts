@@ -133,11 +133,7 @@ Output code in a markdown code block using the following format:
 - If you need to output multiple files, make sure each is in its own code block separated by two newlines.
 - If you aren't working with a specific directory structure or existing file, use a descriptive filename like 'fibonacci.ts'
 
-<<<<<<< HEAD
 When generating code, always include a brief comment (using whatever comment syntax is appropriate for the language) at the top that provides a short summary of what the file's purpose is, for example:
-=======
-When generating code, always include a brief comment (using whatever comment syntax is appropriate for the languaeg) at the top that provides a short summary of what the file's purpose is, for example:
->>>>>>> 20336e2 (Added the a2a agent code)
 
 \`\`\`ts src/components/habit-form.tsx
 /** HabitForm is a form for creating and editing habits to track. */

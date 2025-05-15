@@ -22,11 +22,8 @@ export async function createToken() {
     iss: JWK.kid,
   })
     .setProtectedHeader({ alg: "RS256" })
-<<<<<<< HEAD
     .setIssuedAt()
     .setExpirationTime("30s")
-=======
->>>>>>> 20336e2 (Added the a2a agent code)
     .sign(privateKey);
 }
 
