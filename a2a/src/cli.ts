@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-
+import "dotenv/config";
 import readline from "node:readline";
 import crypto from "node:crypto";
 import { A2AClient } from "./client/client.js";
