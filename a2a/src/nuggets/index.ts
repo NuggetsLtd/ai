@@ -42,9 +42,41 @@ export async function verifyClient({ clientId, token }: VerifyClientInput) {
         }
       );
 
-      return verifyResponse;
+      return {
+        token: verifyResponse,
+        publicKey: json.verificationMethod[0].publicKeyJwk as jose.JWK,
+      };
     } catch (error) {
-      console.log("handle error");
+      console.log("handle error", error);
     }
+  }
+}
+
+type VerifiedInfo = {
+  clientId: string;
+  clientName: string;
+  createdAt: string;
+  verifiedInformation: [];
+};
+
+export async function returnClientVerifiedInfo({
+  publicKey,
+  clientId,
+}: {
+  publicKey: jose.JWK;
+  clientId: string;
+}) {
+  const response = await fetch(
+    `${NUGGETS_OAUTH_PROVIDER_URL}/verified-info/${clientId}/json`
+  );
+
+  if (response.ok) {
+    const json = (await response.json()) as VerifiedInfo;
+
+    const items = json.verifiedInformation.map(($) => {
+      return $.proof.credentialSubject;
+    });
+
+    return items;
   }
 }

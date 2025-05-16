@@ -180,6 +180,18 @@ async function fetchAndDisplayAgentCard() {
   }
 }
 
+async function authenticate() {
+  const { info } = await client.authenticateAgentWithNuggets();
+  console.log(colorize("green", `✓ Authenticated with Nuggets:`));
+  info.forEach((item) => {
+    console.log(
+      `  ${item.type}:        ${colorize("bright", item.username.trim())} - ${
+        item.url
+      }`
+    );
+  });
+}
+
 // --- Main Loop ---
 async function main() {
   // Make main async
@@ -187,9 +199,7 @@ async function main() {
   console.log(colorize("dim", `Agent URL: ${serverUrl}`));
 
   await fetchAndDisplayAgentCard(); // Fetch the card before starting the loop
-
-  await client.authenticateAgentWithNuggets();
-  console.log(colorize("green", `✓ Authenticated with Nuggets`));
+  await authenticate();
 
   console.log(colorize("dim", `Starting Task ID: ${currentTaskId}`));
   console.log(
