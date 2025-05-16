@@ -1,5 +1,9 @@
 // Import necessary types from schema.ts
-import { verifyClient } from "../nuggets/index.js";
+import {
+  authenticate,
+  returnClientVerifiedInfo,
+  verifyClient,
+} from "../nuggets/index.js";
 import {
   // Core types
   AgentCard,
@@ -565,16 +569,11 @@ export class A2AClient {
 
     if (response.ok) {
       const json = (await response.json()) as { token: string };
-      const decoded = jwt.decode(json.token, { complete: true });
+      const info = await authenticate(json.token);
 
-      await verifyClient({
-        clientId: decoded.payload.sub as string,
-        token: json.token,
-      });
-
-      return { success: true };
+      return { info };
     }
 
-    return { success: false };
+    throw new Error("ERROR!");
   }
 }
