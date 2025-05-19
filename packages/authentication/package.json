@@ -1,0 +1,11 @@
+{
+  "name": "@nuggetslife/authentication",
+  "version": "0.0.1",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "jsonwebtoken": "9.0.2",
+    "jwk-to-pem": "2.0.7"
+  }
+}

@@ -16,9 +16,7 @@ import {
   isTaskStatusUpdate,
   isArtifactUpdate,
 } from "./utils.js";
-import jwt from "jsonwebtoken";
-import jwkToPem from "jwk-to-pem";
-import { createToken } from "../nuggets/index.js";
+import { createToken } from "@nuggetslife/authentication";
 
 /**
  * Options for configuring the A2AServer.
