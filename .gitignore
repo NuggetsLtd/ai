@@ -4,3 +4,6 @@ build/
 dist/
 .env
 .DS_Store
+.genkit
+.firebase
+.a2a-tasks

@@ -181,13 +181,21 @@ async function fetchAndDisplayAgentCard() {
 }
 
 async function authenticate() {
-  const { info } = await client.authenticateAgentWithNuggets();
+  const { json, htmlLink, did } = await client.authenticateAgentWithNuggets();
   console.log(colorize("green", `✓ Authenticated with Nuggets:`));
-  info.forEach((item) => {
+
+  console.log(
+    `  Client Name:           ${colorize("bright", json.clientName)}`
+  );
+  console.log(`  Verified Information:  ${colorize("bright", htmlLink)}`);
+  console.log(`  DID:                   ${colorize("bright", did)}`);
+
+  json.verifiedInformation.forEach((item) => {
     console.log(
-      `  ${item.type}:        ${colorize("bright", item.username.trim())} - ${
-        item.url
-      }`
+      `  ${item.proof.credentialSubject.type}:                ${colorize(
+        "bright",
+        item.proof.credentialSubject.username
+      )} - ${item.proof.credentialSubject.url}`
     );
   });
 }

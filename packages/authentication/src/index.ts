@@ -12,7 +12,7 @@ const NUGGETS_OAUTH_PROVIDER_URL =
 const { NUGGETS_CLIENT_ID, NUGGETS_PRIVATE_JWK } = process.env;
 
 export async function createToken(): Promise<string> {
-  const JWK = JSON.parse(NUGGETS_PRIVATE_JWK) as jose.JWK;
+  const JWK = JSON.parse(NUGGETS_PRIVATE_JWK as string) as jose.JWK;
 
   const privateKey = await jose.importJWK(JWK);
 
@@ -81,11 +81,11 @@ export async function returnClientVerifiedInfo() {
   if (response.ok) {
     const json = (await response.json()) as VerifiedInfo;
 
-    const items = json.verifiedInformation.map(($) => {
-      return $.proof.credentialSubject;
-    });
-
-    return items;
+    return {
+      json,
+      htmlLink: `${NUGGETS_OAUTH_PROVIDER_URL}/verified-info/${NUGGETS_CLIENT_ID}/html`,
+      did: `${NUGGETS_OAUTH_PROVIDER_URL}/did/${NUGGETS_CLIENT_ID}`,
+    };
   }
 }
 

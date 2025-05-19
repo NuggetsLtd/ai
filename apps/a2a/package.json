@@ -1,5 +1,5 @@
 {
-  "name": "a2a-samples-js",
+  "name": "@nuggetslife/a2a",
   "version": "0.1.0",
   "main": "dist/index.js",
   "type": "module",
@@ -15,6 +15,7 @@
     "agents:coder": "npx tsx src/agents/coder/index.ts"
   },
   "dependencies": {
+    "@nuggetslife/authentication": "*",
     "@genkit-ai/googleai": "^1.8.0",
     "@genkit-ai/vertexai": "^1.8.0",
     "@types/cors": "^2.8.17",
@@ -27,6 +28,5 @@
     "jose": "^6.0.11",
     "jsonwebtoken": "^9.0.2",
     "jwk-to-pem": "^2.0.7"
-  },
-  "packageManager": "pnpm@10.7.1+sha512.2d92c86b7928dc8284f53494fb4201f983da65f0fb4f0d40baafa5cf628fa31dae3e5968f12466f17df7e97310e30f343a648baea1b9b350685dafafffdf5808"
+  }
 }
