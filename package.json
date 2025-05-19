@@ -6,7 +6,8 @@
     "docker:communicator": "docker compose --env-file=./docker/.env up",
     "aws:ecr:signin": "./scripts/aws-ecr-signin.sh",
     "a2a:agents:coder": "turbo agents:coder",
-    "a2a:cli": "turbo a2a:cli"
+    "a2a:cli": "turbo a2a:cli",
+    "dev": "turbo dev"
   },
   "devDependencies": {
     "turbo": "^2.5.3"
