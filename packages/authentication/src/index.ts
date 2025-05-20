@@ -49,8 +49,14 @@ async function request<T = any>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export async function verify({ token }: VerifyClientInput) {
+  const decoded = jwt.decode(token, { complete: true });
+
+  if (!decoded.payload.sub) {
+    throw new Error("Unable to decode the client ID from the token");
+  }
+
   const response = await request(
-    `${NUGGETS_OAUTH_PROVIDER_URL}/did/${NUGGETS_CLIENT_ID}`
+    `${NUGGETS_OAUTH_PROVIDER_URL}/did/${decoded.payload.sub}`
   );
 
   try {
@@ -60,7 +66,7 @@ export async function verify({ token }: VerifyClientInput) {
       algorithms: ["RS256"],
     });
 
-    return { publicKey: publicKeyJwk };
+    return { publicKey: publicKeyJwk, clientId: decoded.payload.sub };
   } catch (error) {
     throw new Error("Failed to authenticate the agent");
   }
@@ -73,9 +79,13 @@ type VerifiedInfo = {
   verifiedInformation: [];
 };
 
-export async function returnClientVerifiedInfo() {
+export async function returnClientVerifiedInfo({
+  clientId,
+}: {
+  clientId: string;
+}) {
   const response = await fetch(
-    `${NUGGETS_OAUTH_PROVIDER_URL}/verified-info/${NUGGETS_CLIENT_ID}/json`
+    `${NUGGETS_OAUTH_PROVIDER_URL}/verified-info/${clientId}/json`
   );
 
   if (response.ok) {
@@ -83,13 +93,17 @@ export async function returnClientVerifiedInfo() {
 
     return {
       json,
-      htmlLink: `${NUGGETS_OAUTH_PROVIDER_URL}/verified-info/${NUGGETS_CLIENT_ID}/html`,
-      did: `${NUGGETS_OAUTH_PROVIDER_URL}/did/${NUGGETS_CLIENT_ID}`,
+      htmlLink: `${NUGGETS_OAUTH_PROVIDER_URL}/verified-info/${clientId}/html`,
+      did: `${NUGGETS_OAUTH_PROVIDER_URL}/did/${clientId}`,
     };
   }
+
+  throw new Error(
+    "Unable to find the verified information for the requested client"
+  );
 }
 
 export async function authenticate(token: string) {
-  await verify({ token });
-  return returnClientVerifiedInfo();
+  const { clientId } = await verify({ token });
+  return returnClientVerifiedInfo({ clientId: clientId as string });
 }
