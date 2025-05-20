@@ -102,18 +102,6 @@ Demonstrates integration using the Model Context Protocol.
   - **server/**: MCP server implementation.
   - **authentication/**: Authentication utilities.
 
-### Agent to Agent Authentication
-
-Navigate to the `apps/a2a` directory and follow the instructions in the respective agent READMEs:
-
-- **Movie Agent**: Uses TMDB API to search for movie information.
-- **Coder Agent**: Generates full code files as artifacts.
-
-## Development
-
-- **Build**: Use `yarn build` in the respective package directories.
-- **Dev**: Use `yarn dev` for development.
-
 ## Configuration
 
 - **Environment Variables**: Ensure all necessary environment variables are set as per the setup instructions.
