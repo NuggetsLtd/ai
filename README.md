@@ -53,6 +53,15 @@ An example of Nuggets Authentication when connecting to an AI Agent. This allows
 
 If all has worked successfully your should see all the verified information about your Client returned in the Terminal when connecting.
 
+### How the authentication works
+
+1. Create a Nuggets AI Agent (within the [accounts portal](https://accounts.nuggets.life)) and download the private key and client ID. Using the client ID as the subject, generate a signed JWT using the private key. Send to the authenticating server.
+2. Once received, decode the JWT to retrieve the Client ID via the `payload.sub` field.
+3. Using the client ID, the server can retrieve the clients DID via the `https://auth.nuggets.life/did/CLIENT_ID` endpoint.
+4. Using the public key from the DID Document, authenticate the validity of the token. If the verification passes, you know that the agent has authenticated successfully.
+5. Once successful the server is able to retrieve more information about the agent's Nuggets Client via the `https://auth.nuggets.life/verified-info/CLIENT_ID/json` endpoint.
+6. This can then be used to display more information about the AI Agent and confirm its identity.
+
 ## MCP
 
 Demonstrates integration using the Model Context Protocol.
