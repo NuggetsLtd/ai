@@ -17,7 +17,7 @@ import {
   isArtifactUpdate,
 } from "./utils.js";
 
-import { createToken } from "@nuggetslife/authentication";
+import { startAuthentication } from "@nuggetslife/authentication";
 
 /**
  * Options for configuring the A2AServer.
@@ -235,7 +235,7 @@ export class A2AServer {
   }
 
   async authenticate(_: Request, res: Response) {
-    const token = await createToken();
+    const token = await startAuthentication();
     res.send({ token });
   }
 

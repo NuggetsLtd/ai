@@ -24,7 +24,7 @@ class InvalidAgentError extends Error {
   }
 }
 
-export async function createToken(): Promise<string> {
+export async function startAuthentication(): Promise<string> {
   const JWK = JSON.parse(NUGGETS_PRIVATE_JWK as string) as jose.JWK;
 
   const privateKey = await jose.importJWK(JWK);
