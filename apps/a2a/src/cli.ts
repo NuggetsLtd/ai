@@ -15,6 +15,7 @@ import {
   // Type for the agent card
   AgentCard,
 } from "./schema.js";
+import { getVerifiedDetails } from "@nuggetslife/authentication";
 
 // --- ANSI Colors ---
 const colors = {
@@ -181,18 +182,23 @@ async function fetchAndDisplayAgentCard() {
 }
 
 async function authenticate() {
-  const { json, htmlLink, did } = await client.authenticateAgentWithNuggets();
+  const { did, services } = await client.authenticateAgentWithNuggets();
+  const details = await getVerifiedDetails(did);
+
   console.log(colorize("green", `✓ Authenticated with Nuggets:`));
 
+  console.log(`  Client Name: ${colorize("bright", details.clientName)}`);
   console.log(
-    `  Client Name:           ${colorize("bright", json.clientName)}`
+    `  Verified JSON: ${colorize("bright", services.VerifiedInformationAPI)}`
   );
-  console.log(`  Verified Information:  ${colorize("bright", htmlLink)}`);
-  console.log(`  DID:                   ${colorize("bright", did)}`);
+  console.log(
+    `  Verified HTML: ${colorize("bright", services.VerifiedInformationHTML)}`
+  );
+  console.log(`  DID: ${colorize("bright", did.id)}`);
 
-  json.verifiedInformation.forEach((item) => {
+  details.verifiedInformation.forEach((item) => {
     console.log(
-      `  ${item.proof.credentialSubject.type}:                ${colorize(
+      `  ${item.proof.credentialSubject.type}: ${colorize(
         "bright",
         item.proof.credentialSubject.username
       )} - ${item.proof.credentialSubject.url}`

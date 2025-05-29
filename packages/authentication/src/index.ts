@@ -1,15 +1,28 @@
 import jwt from "jsonwebtoken";
 import jwkToPem from "jwk-to-pem";
 import * as jose from "jose";
+import { type DIDDocument, isValidDID, resolveNuggetsDidUrl } from "./did";
 
 type VerifyClientInput = {
   token: string;
 };
 
-const NUGGETS_OAUTH_PROVIDER_URL =
-  process.env.NUGGETS_OAUTH_PROVIDER_URL || "http://oauth-provider:3015";
+type ServicesTypes = "VerifiedInformationAPI" | "VerifiedInformationHTML";
 
-const { NUGGETS_CLIENT_ID, NUGGETS_PRIVATE_JWK } = process.env;
+type DIDDocumentResponse = {
+  services: Record<ServicesTypes, string>;
+  did: DIDDocument;
+};
+
+const { NUGGETS_DID, NUGGETS_PRIVATE_JWK } = process.env;
+
+class InvalidAgentError extends Error {
+  constructor() {
+    super();
+    this.message =
+      "The request from the Agent is invalid. This could be a bad actor.";
+  }
+}
 
 export async function createToken(): Promise<string> {
   const JWK = JSON.parse(NUGGETS_PRIVATE_JWK as string) as jose.JWK;
@@ -17,7 +30,7 @@ export async function createToken(): Promise<string> {
   const privateKey = await jose.importJWK(JWK);
 
   return new jose.SignJWT({
-    sub: NUGGETS_CLIENT_ID,
+    sub: NUGGETS_DID,
     iss: JWK.kid,
   })
     .setProtectedHeader({ alg: "RS256" })
@@ -48,28 +61,23 @@ async function request<T = any>(url: string, init?: RequestInit): Promise<T> {
   });
 }
 
-export async function verify({ token }: VerifyClientInput) {
+export async function resolveDID({
+  token,
+}: VerifyClientInput): Promise<DIDDocument> {
   const decoded = jwt.decode(token, { complete: true });
 
-  if (!decoded.payload.sub) {
-    throw new Error("Unable to decode the client ID from the token");
+  if (!decoded?.payload.sub) {
+    throw new Error("Unable to decode the DID from the token");
   }
 
-  const response = await request(
-    `${NUGGETS_OAUTH_PROVIDER_URL}/did/${decoded.payload.sub}`
-  );
+  const DID = decoded.payload.sub as string;
 
-  try {
-    const { publicKeyJwk } = response.verificationMethod[0];
-
-    jwt.verify(token, jwkToPem(publicKeyJwk), {
-      algorithms: ["RS256"],
-    });
-
-    return { publicKey: publicKeyJwk, clientId: decoded.payload.sub };
-  } catch (error) {
-    throw new Error("Failed to authenticate the agent");
+  if (!isValidDID(DID)) {
+    throw new Error("Invalid DID returned from the Agent");
   }
+
+  const resolvedWellKnownURL = resolveNuggetsDidUrl(DID);
+  return request<DIDDocument>(resolvedWellKnownURL);
 }
 
 type VerifiedInfo = {
@@ -79,31 +87,41 @@ type VerifiedInfo = {
   verifiedInformation: [];
 };
 
-export async function returnClientVerifiedInfo({
-  clientId,
-}: {
-  clientId: string;
-}) {
-  const response = await fetch(
-    `${NUGGETS_OAUTH_PROVIDER_URL}/verified-info/${clientId}/json`
-  );
+export async function getVerifiedDetails(did: DIDDocument) {
+  const service = did.service.find(($) => $.type === "VerifiedInformationAPI");
 
-  if (response.ok) {
-    const json = (await response.json()) as VerifiedInfo;
-
-    return {
-      json,
-      htmlLink: `${NUGGETS_OAUTH_PROVIDER_URL}/verified-info/${clientId}/html`,
-      did: `${NUGGETS_OAUTH_PROVIDER_URL}/did/${clientId}`,
-    };
+  if (!service) {
+    throw new Error("Unable to find the verified information endpoint");
   }
-
-  throw new Error(
-    "Unable to find the verified information for the requested client"
-  );
+  return request<VerifiedInfo>(service.serviceEndpoint);
 }
 
-export async function authenticate(token: string) {
-  const { clientId } = await verify({ token });
-  return returnClientVerifiedInfo({ clientId: clientId as string });
+export async function authenticate(
+  token: string
+): Promise<DIDDocumentResponse> {
+  let response: DIDDocument;
+
+  try {
+    // Verify the token against the Private Key
+    response = await resolveDID({ token });
+
+    jwt.verify(token, jwkToPem(response.verificationMethod[0].publicKeyJwk), {
+      algorithms: ["RS256"],
+    });
+  } catch (error) {
+    throw new InvalidAgentError();
+  }
+
+  const normalizedServices = response.service.reduce(
+    (obj, $) => ({
+      ...obj,
+      [$.type]: $.serviceEndpoint,
+    }),
+    {} as Record<ServicesTypes, string>
+  );
+
+  return {
+    services: normalizedServices,
+    did: response,
+  };
 }

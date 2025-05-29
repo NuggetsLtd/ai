@@ -5,6 +5,8 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "did-resolver": "4.1.0",
+    "web-did-resolver": "2.0.30",
     "jsonwebtoken": "9.0.2",
     "jwk-to-pem": "2.0.7"
   }

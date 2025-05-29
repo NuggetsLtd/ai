@@ -565,11 +565,10 @@ export class A2AClient {
 
     if (response.ok) {
       const json = (await response.json()) as { token: string };
-      return await authenticate(json.token);
+      return authenticate(json.token);
     }
 
     const error = await response.text();
-    console.log(error);
     throw new Error("There has been an error authenticating this agent");
   }
 }
