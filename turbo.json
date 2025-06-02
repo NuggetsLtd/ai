@@ -13,6 +13,10 @@
       "persistent": true,
       "cache": false
     },
+    "start": {
+      "persistent": true,
+      "cache": false
+    },
     "a2a:cli": {
       "persistent": false,
       "cache": false

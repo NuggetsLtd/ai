@@ -6,10 +6,11 @@
   "scripts": {
     "build": "tsup --config tsup.config.ts",
     "dev": "tsup --watch --onSuccess 'node dist/app.js'",
-    "start": "node build/app.js"
+    "start": "node dist/app.js"
   },
   "type": "module",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.52.0",
     "@aws-sdk/client-bedrock-runtime": "^3.779.0",
     "@modelcontextprotocol/sdk": "^1.8.0",
     "@nuggetslife/mcp-server": "workspace:*",

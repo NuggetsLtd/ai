@@ -1,37 +1,64 @@
-# JavaScript Samples
+# A2A Authentication
 
-The provided samples are built using [Genkit](https://genkit.dev/) using the Gemini API.
+An example of Nuggets Authentication when connecting to an AI Agent. This allows Agents to confirm they are communicating with the correct Agent.
+
+## Getting Started
+
+To get started you'll first need to clone the repo and run `pnpm i`. If you do not have `pnpm` please see: https://pnpm.io/.
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) and [pnpm](https://pnpm.io/) installed
 
 ## Agents
 
 - [Movie Agent](src/agents/movie-agent/README.md): Uses TMDB API to search for movie information and answer questions.
 - [Coder Agent](src/agents/coder/README.md): Generates full code files as artifacts.
 
-## Testing the Agents
+### Setup
 
-First, follow the instructions in the agent's README file, then run `npx tsx ./cli.ts` to start up a command-line client to talk to the agents. Example:
+1. **Create a Gemini API key**:
 
-1. Navigate to the samples/js directory:
-   ```bash
-   cd samples/js
+   As this project is build on top of the Google A2A Protocol example [repo](https://github.com/google/A2A/tree/main/samples/js), you will firstly need a Gemini API key. This can be found here: https://ai.google.dev/gemini-api/docs/api-key.
+
+2. **Create a AI Agent Client in the Nuggets Accounts Portal**
+
+   Log into the [Nuggets Accounts Portal](https://accounts.nuggets.life) and create your AI Agent. **_Make ensure to download your private key and keep a record of your client ID as these are needed for the next part_**.
+
+3. **Add your environment variables**
+
+   Once created you'll need to these to a `.env` file in the `/apps/a2a` directory.
+
    ```
-2. Run npm install:
-   ```bash
-   npm install
+   NUGGETS_PRIVATE_JWK={}
+   NUGGETS_CLIENT_ID=xxxxxxx
    ```
-3. Run an agent:
 
-```bash
-export GEMINI_API_KEY=<your_api_key>
-npm run agents:coder
+4. **Run the coder agent**:
 
-# in a separate terminal
-npm run a2a:cli
-```
+   ```bash
+   npm run a2a:agent:coder
+   ```
 
----
+5. **Run the Agent to Agent CLI**:
 
-**NOTE:**
-This is sample code and not production-quality libraries.
+   In a new terminal run:
 
----
+   ```bash
+   npm run a2a:cli
+   ```
+
+If all has worked successfully your should see all the verified information about your Client returned in the Terminal when connecting.
+
+### How the authentication works
+
+1. Create a Nuggets AI Agent (within the [accounts portal](https://accounts.nuggets.life)) and download the private key and client ID. Using the client ID as the subject, generate a signed JWT using the private key. Send to the authenticating server.
+2. Once received, decode the JWT to retrieve the Client ID via the `payload.sub` field.
+3. Using the client ID, the server can retrieve the clients DID via the `https://auth.nuggets.life/did/CLIENT_ID` endpoint.
+4. Using the public key from the DID Document, authenticate the validity of the token. If the verification passes, you know that the agent has authenticated successfully.
+5. Once successful the server is able to retrieve more information about the agent's Nuggets Client via the `https://auth.nuggets.life/verified-info/CLIENT_ID/json` endpoint.
+6. This can then be used to display more information about the AI Agent and confirm its identity.
+
+## License
+
+This project is licensed under the MIT License.

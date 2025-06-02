@@ -4,10 +4,12 @@
   "private": true,
   "scripts": {
     "docker:communicator": "docker compose --env-file=./docker/.env up",
+    "docker:redis": "docker compose --env-file=./docker/.env up redis",
     "aws:ecr:signin": "./scripts/aws-ecr-signin.sh",
     "a2a:agents:coder": "turbo agents:coder",
     "a2a:cli": "turbo a2a:cli",
-    "dev": "turbo dev"
+    "dev": "turbo dev",
+    "start": "turbo start"
   },
   "devDependencies": {
     "turbo": "^2.5.3"
