@@ -87,6 +87,9 @@ importers:
       express:
         specifier: ^5.1.0
         version: 5.1.0
+      openai:
+        specifier: ^5.0.2
+        version: 5.0.2(zod@3.25.36)
       socket.io:
         specifier: ^4.8.1
         version: 4.8.1
@@ -2180,6 +2183,18 @@ packages:
 
   openai@4.103.0:
     resolution: {integrity: sha512-eWcz9kdurkGOFDtd5ySS5y251H2uBgq9+1a2lTBnjMMzlexJ40Am5t6Mu76SSE87VvitPa0dkIAp75F+dZVC0g==}
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.23.8
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
+
+  openai@5.0.2:
+    resolution: {integrity: sha512-NN7LAAImgBmd4RIe6WyRpLmwCbn+HQ1iaXeIG7K9DM3Auy/G2waKFhrDfRgaEeY0UUPnm6nohaCsqcS+zO8+2g==}
     hasBin: true
     peerDependencies:
       ws: ^8.18.0
@@ -5427,6 +5442,10 @@ snapshots:
       zod: 3.25.36
     transitivePeerDependencies:
       - encoding
+
+  openai@5.0.2(zod@3.25.36):
+    optionalDependencies:
+      zod: 3.25.36
 
   openid-client@5.7.1:
     dependencies:

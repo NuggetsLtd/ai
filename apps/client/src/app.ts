@@ -4,9 +4,9 @@ import http from "http";
 import { Server, Socket } from "socket.io";
 import path from "path";
 import { fileURLToPath } from 'url';
-import { ConverseMcpBedrockClient, ConverseMcpAnthropicClient, BedrockMessage, AnthropicMessage, ClientType } from './converse-mcp-client.js'
+import { ConverseMcpClient, ConverseMcpBedrockClient, ConverseMcpAnthropicClient, ConverseMcpOpenAiClient, BedrockMessage, ClientType } from './converse-mcp-clients/index.js'
 import EventEmitter from "events";
-import config from './config.js'
+import config, { determineClientType } from './config.js'
 import { Notification } from './types.js'
 import { oidcCallbackHandler } from './oidc-callback-handler.js'
 
@@ -16,10 +16,6 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-const awsBedrockModelId = config.bedrock.modelId;
-const awsBedrockRegion = config.bedrock.region;
-const anthropicApiKey = config.anthropic.apiKey;
-const anthropicModelId = config.anthropic.modelId;
 const callbackToken = config.communicator.callbackToken;
 const chatWelcomeMessage: BedrockMessage = {
   role: "assistant",
@@ -27,45 +23,7 @@ const chatWelcomeMessage: BedrockMessage = {
     text: "Hello, how can I help you today?"
   }]
 };
-let clientType: ClientType
-let modelId: string
-
-switch (config.clientType) {
-  case 'anthropic':
-    clientType = ClientType.Anthropic
-    if(!anthropicModelId) {
-      throw new Error("ANTHROPIC_MODEL_ID environment variable NOT set");
-    }
-    if(anthropicModelId.startsWith('arn:aws:bedrock:')) {
-      throw new Error('AWS Bedrock model id should start with "arn:aws:bedrock:"')
-    }
-
-    modelId = anthropicModelId
-    break;
-  case 'bedrock':
-      clientType = ClientType.AwsBedrock
-      if(!awsBedrockModelId) {
-        throw new Error("BEDROCK_MODEL_ID environment variable NOT set");
-      }
-      modelId = awsBedrockModelId
-    break;
-  default:
-    throw new Error("CLIENT_TYPE environment variable NOT set or unsupported");
-}
-
-// check env vars are set for AWS Bedrock
-if (clientType === ClientType.AwsBedrock) {
-  if(!awsBedrockRegion) {
-    throw new Error("BEDROCK_REGION environment variable NOT set");
-  }
-}
-
-// check env vars are set for Anthropic
-if (clientType === ClientType.Anthropic) {
-  if(!anthropicApiKey) {
-    throw new Error("ANTHROPIC_API_KEY environment variable NOT set");
-  }
-}
+const { clientType, modelId } = determineClientType()
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -73,18 +31,20 @@ app.use(express.static(path.join(__dirname, "../public")));
 
 const notificationEventEmitter = new EventEmitter();
 
-
 io.on("connection", async (socket: Socket) => {
   console.log("A user connected");
   const mcpServerEventEmitter = new EventEmitter();
-  let mcpClient: ConverseMcpBedrockClient | ConverseMcpAnthropicClient
+  let mcpClient: ConverseMcpClient
   
   switch (clientType) {
     case ClientType.Anthropic:
       mcpClient = new ConverseMcpAnthropicClient(modelId, mcpServerEventEmitter)
       break;
     case ClientType.AwsBedrock:
-      mcpClient = new ConverseMcpBedrockClient(modelId, awsBedrockRegion as string, mcpServerEventEmitter)
+      mcpClient = new ConverseMcpBedrockClient(modelId, config.bedrock.region as string, mcpServerEventEmitter)
+      break;
+    case ClientType.OpenAI:
+      mcpClient = new ConverseMcpOpenAiClient(modelId, mcpServerEventEmitter)
       break;
   }
 
