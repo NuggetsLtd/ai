@@ -15,7 +15,7 @@
     "agents:coder": "npx tsx src/agents/coder/index.ts"
   },
   "dependencies": {
-    "@nuggetslife/authentication": "workspace:*",
+    "@nuggetslife/auth": "1.0.3",
     "@genkit-ai/googleai": "^1.8.0",
     "@genkit-ai/vertexai": "^1.8.0",
     "@types/cors": "^2.8.17",

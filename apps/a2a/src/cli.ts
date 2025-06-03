@@ -15,7 +15,7 @@ import {
   // Type for the agent card
   AgentCard,
 } from "./schema.js";
-import { getVerifiedDetails } from "@nuggetslife/authentication";
+import { getVerifiedDetails } from "@nuggetslife/auth/ai";
 
 // --- ANSI Colors ---
 const colors = {

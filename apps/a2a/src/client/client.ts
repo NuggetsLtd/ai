@@ -1,5 +1,5 @@
 // Import necessary types from schema.ts
-import { authenticate } from "@nuggetslife/authentication";
+import { verifyToken } from "@nuggetslife/auth/ai";
 import {
   // Core types
   AgentCard,
@@ -565,7 +565,7 @@ export class A2AClient {
 
     if (response.ok) {
       const json = (await response.json()) as { token: string };
-      return authenticate(json.token);
+      return verifyToken(json.token);
     }
 
     const error = await response.text();
