@@ -16,11 +16,25 @@ To get started you'll first need to clone the repo and run `pnpm i`. If you do n
 
 ## Configure .env file
 
-Copy & rename the [.env.example](https://github.com/NuggetsLtd/ai/blob/main/apps/client/.env.example) to `.env`, then add your OIDC Client ID and secret, and API key for your LLM of choice:
+Copy & rename the [.env.example](https://github.com/NuggetsLtd/ai/blob/main/apps/client/.env.example) to `.env`, then add your OIDC Client ID and secret, and configuration for your LLM of choice:
 
-```
+```bash
 NUGGETS_PRIVATE_JWK={}
 NUGGETS_CLIENT_ID=xxxxxxx
+
+CLIENT_TYPE=anthropic # anthropic, bedrock, openai
+
+# AWS Bedrock configuration
+BEDROCK_MODEL_ID=arn:aws:bedrock:<YOUR_BEDROCK_MODEL_ID>
+BEDROCK_REGION=<YOUR_AWS_REGION>
+
+# Anthropic config
+ANTHROPIC_MODEL_ID=claude-3-5-sonnet-latest
+ANTHROPIC_API_KEY=
+
+# OpenAI config
+OPENAI_MODEL_ID=gpt-4.1
+OPENAI_API_KEY=
 ```
 
 ## Build & Run
