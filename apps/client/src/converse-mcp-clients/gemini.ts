@@ -87,7 +87,7 @@ export class ConverseMcpGeminiClient extends ConverseMcpBaseClient {
     })
 
     if(toolUse) {
-      for (var contentBlock of response.candidates[0].content?.parts) {
+      for (const contentBlock of response.candidates[0].content?.parts) {
         if(contentBlock.text) {
           this.conversation.push({
             role: "model",
