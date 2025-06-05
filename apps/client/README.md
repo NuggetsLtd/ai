@@ -14,6 +14,13 @@ To get started you'll first need to clone the repo and run `pnpm i`. If you do n
 - [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) installed
 - [Turborepo](https://turborepo.com/) installed
 
+## Configurable Providers
+
+- [Amazon Bedrock](https://aws.amazon.com/bedrock/)
+- [Anthropic](https://www.anthropic.com/)
+- [Gemini](https://gemini.google.com/)
+- [OpenAI](https://openai.com/)
+
 ## Configure .env file
 
 Copy & rename the [.env.example](https://github.com/NuggetsLtd/ai/blob/main/apps/client/.env.example) to `.env`, then add your OIDC Client ID and secret, and configuration for your LLM of choice:
@@ -22,7 +29,7 @@ Copy & rename the [.env.example](https://github.com/NuggetsLtd/ai/blob/main/apps
 NUGGETS_PRIVATE_JWK={}
 NUGGETS_CLIENT_ID=xxxxxxx
 
-CLIENT_TYPE=anthropic # anthropic, bedrock, openai
+CLIENT_TYPE=anthropic # anthropic, bedrock, gemini, openai
 
 # AWS Bedrock configuration
 BEDROCK_MODEL_ID=arn:aws:bedrock:<YOUR_BEDROCK_MODEL_ID>
@@ -31,6 +38,10 @@ BEDROCK_REGION=<YOUR_AWS_REGION>
 # Anthropic config
 ANTHROPIC_MODEL_ID=claude-3-5-sonnet-latest
 ANTHROPIC_API_KEY=
+
+# Google Gemini config
+GEMINI_MODEL_ID=gemini-2.0-flash-001
+GEMINI_API_KEY=
 
 # OpenAI config
 OPENAI_MODEL_ID=gpt-4.1
