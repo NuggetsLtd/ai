@@ -4,7 +4,7 @@ import http from "http";
 import { Server, Socket } from "socket.io";
 import path from "path";
 import { fileURLToPath } from 'url';
-import { ConverseMcpClient, ConverseMcpBedrockClient, ConverseMcpAnthropicClient, ConverseMcpOpenAiClient, BedrockMessage, ClientType } from './converse-mcp-clients/index.js'
+import { ConverseMcpClient, ConverseMcpBedrockClient, ConverseMcpAnthropicClient, ConverseMcpGeminiClient, ConverseMcpOpenAiClient, BedrockMessage, ClientType } from './converse-mcp-clients/index.js'
 import EventEmitter from "events";
 import config, { determineClientType } from './config.js'
 import { Notification } from './types.js'
@@ -42,6 +42,9 @@ io.on("connection", async (socket: Socket) => {
       break;
     case ClientType.AwsBedrock:
       mcpClient = new ConverseMcpBedrockClient(modelId, config.bedrock.region as string, mcpServerEventEmitter)
+      break;
+    case ClientType.Gemini:
+      mcpClient = new ConverseMcpGeminiClient(modelId, mcpServerEventEmitter)
       break;
     case ClientType.OpenAI:
       mcpClient = new ConverseMcpOpenAiClient(modelId, mcpServerEventEmitter)
@@ -88,7 +91,7 @@ io.on("connection", async (socket: Socket) => {
 });
 
 const sendOutcomeToMcpClient = (outcome: any) => {
-  let outcomeMsg = "I have completed the verification process, and ";
+  let outcomeMsg = "The verification process has completed, and ";
 
   outcome.verified
     ? outcomeMsg += "verified "
@@ -96,13 +99,13 @@ const sendOutcomeToMcpClient = (outcome: any) => {
   
   switch (outcome.proof.type) {
     case "over18":
-      outcomeMsg += "that I am over 18 years old";
+      outcomeMsg += "that the user is over 18 years old";
       break;
     case "Twitter":
-      outcomeMsg += `my Twitter account${outcome.verified ? ` username is ${outcome.proof.username}` : ""}`;
+      outcomeMsg += `the user\'s Twitter account${outcome.verified ? ` username is ${outcome.proof.username}` : ""}`;
       break;
     default:
-      outcomeMsg += `the identity element`;
+      outcomeMsg += `the user\'s identity element`;
   }
 
   return outcomeMsg;

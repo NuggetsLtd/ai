@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import type { ResponseInputItem, Tool, EasyInputMessage } from "openai/resources/responses/responses.mjs";
+import type { ResponseInputItem, Tool } from "openai/resources/responses/responses.mjs";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { ConverseMcpBaseClient } from "./base.js";
 import EventEmitter from "events";
@@ -65,7 +65,6 @@ export class ConverseMcpOpenAiClient extends ConverseMcpBaseClient {
     const response: OpenAI.Responses.Response = await this.client.responses.create(
         input
     );
-    console.log('OpenAI Response', response, response.output[0])
 
     const toolUse = response.output.find(contentBlock => contentBlock.type === 'function_call')
 

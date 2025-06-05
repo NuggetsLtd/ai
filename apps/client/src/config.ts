@@ -6,6 +6,8 @@ const {
   BEDROCK_REGION,
   ANTHROPIC_MODEL_ID,
   ANTHROPIC_API_KEY,
+  GEMINI_MODEL_ID,
+  GEMINI_API_KEY,
   OPENAI_MODEL_ID,
   OPENAI_API_KEY,
   NUGGETS_WEBHOOK_API_TOKEN
@@ -20,6 +22,10 @@ const config = {
   anthropic: {
     modelId: ANTHROPIC_MODEL_ID,
     apiKey: ANTHROPIC_API_KEY
+  },
+  gemini: {
+    modelId: GEMINI_MODEL_ID,
+    apiKey: GEMINI_API_KEY
   },
   openai: {
     modelId: OPENAI_MODEL_ID,
@@ -60,12 +66,23 @@ export const determineClientType = () => {
       clientType = ClientType.AwsBedrock
       modelId = config.bedrock.modelId
       break;
+    case 'gemini':
+      if(!config.gemini.modelId) {
+        throw new Error("BEDROCK_MODEL_ID environment variable NOT set");
+      }
+      if(!config.bedrock.region) {
+        throw new Error("BEDROCK_REGION environment variable NOT set");
+      }
+
+      clientType = ClientType.Gemini
+      modelId = config.gemini.modelId
+      break;
     case 'openai':
       if(!config.openai.modelId) {
-        throw new Error("OPENAPI_MODEL_ID environment variable NOT set");
+        throw new Error("GEMINI_MODEL_ID environment variable NOT set");
       }
-      if(!config.openai.apiKey) {
-        throw new Error("OPENAPI_API_KEY environment variable NOT set");
+      if(!config.gemini.apiKey) {
+        throw new Error("GEMINI_API_KEY environment variable NOT set");
       }
       
       clientType = ClientType.OpenAI
